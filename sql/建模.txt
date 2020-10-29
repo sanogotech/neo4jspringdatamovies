@@ -1,0 +1,44 @@
+#创建模型语句
+CREATE (sally:Person{name:'Sally',age:23})
+CREATE (john:Person{name:'John',age:27})
+
+CREATE (gdb:Book{title:'Graph Databases',authors:['Ian Robinson','Jim Webber']})
+
+CREATE (sally)-[:FRIEND_OF{since:1357718400}]->(john)
+CREATE (sally)-[:HAS_READ{rating:5,on:1360396800}]->(gdb)
+CREATE (john) -[:HAS_READ{rating:4,on:1359878400}]->(gdb)
+
+#查询语句
+#什么时候成为朋友的？
+match(sally:Person{name:'Sally'})
+match(john:Person{name:'John'})
+match(sally)-[r:FRIEND_OF]-(john)
+return r.since as friends_since
+
+#读书的频率
+match(gdb:Book{title:'Graph Databases'})
+match(gdb)<-[r:HAS_READ]-()
+return avg(r.rating) as average_raging
+
+#书的作者
+match(gdb:Book{title:'Graph Databases'})
+return gdb.authors as Authors
+
+#人的年龄
+match(sally:Person{name:'Sally'})
+return sally.age as Sally_Age
+
+#谁更年长
+match(p:Person)
+where p.name='John' or p.name='Sally'
+return p.name as oldest
+order by p.age desc
+limit 1
+
+#谁先读的书
+match(p:Person)
+where p.name='John' or p.name='Sally'
+match(p)-[r:HAS_READ]->(b:Book{title:'Graph Databases'})
+return p.name as first_reader
+order by r.on
+limit 1
